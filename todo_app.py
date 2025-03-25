@@ -1,5 +1,7 @@
 from pymongo import MongoClient  # Mengimpor MongoClient dari pustaka pymongo untuk menghubungkan aplikasi ke MongoDB
 from datetime import datetime  # Mengimpor datetime untuk menambahkan timestamp
+from tabulate import tabulate  # Mengimpor tabulate untuk menampilkan data dalam bentuk tabel
+import os  # Mengimpor os untuk membersihkan konsol
 
 # Membuat koneksi ke MongoDB menggunakan URI koneksi
 client = MongoClient("mongodb+srv://androidone252:p7wRtscSkaOTPJPu@cluster0.am62x.mongodb.net/?retryWrites=true&w=majority&appName=Cluster0")
@@ -17,14 +19,14 @@ finally:
     print("Database connection established")
 
 # Fungsi untuk membuat tugas baru dengan judul, deskripsi, dan status
-def add_task(title, description):
+def add_task(title, description,status):
     try:
         # Membuat dokumen tugas baru dengan judul, deskripsi, status default "Belum Selesai", dan timestamp
         task = {
             "title": title,
             "description": description,
-            "status": "Belum Selesai",
-            "created_at": datetime.now()  # Menambahkan timestamp
+            "status": status,
+            "created_at": datetime.now().strftime("%d:%m:%y %H:%M:%S")  # Menambahkan timestamp dengan format DD:MM:YY hh:mm:ss
         }
         # Menyisipkan dokumen tugas ke dalam koleksi 'task'
         task_collection.insert_one(task)
@@ -39,10 +41,25 @@ def view_all_tasks():
     try:
         # Mengambil semua dokumen tugas dari koleksi
         view = task_collection.find()
-        # Iterasi melalui setiap tugas dan mencetak detailnya
+        tasknumber = 1
+        # Menyiapkan data untuk ditampilkan dalam bentuk tabel
+        table_data = []
         for i in view:
-            print(f"ID:{i['_id']}, Judul: {i['title']}, Deskripsi: {i['description']}, status : {i['status']}, created_at: {i.get('created_at', 'Tidak ada timestamp')}")
-
+            table_data.append([  # Menambahkan nomor urut tugas
+                str(i['_id']),
+                tasknumber,  # Mengonversi ObjectId ke string untuk ditampilkan
+                i['title'],
+                i['description'],
+                i['status'],
+                i.get('created_at', 'Tidak ada timestamp')
+            ])
+            tasknumber += 1  # Menambahkan nomor urut tugas
+        # Menampilkan data dalam bentuk tabel
+        print(tabulate(table_data, headers=["ID", "No", "Judul", "Deskripsi", "Status", "Dibuat Pada"], tablefmt="grid"))
+    except Exception as e:
+        # Menangkap dan mencetak kesalahan jika terjadi masalah saat menampilkan tugas
+        print(f"terjadi kesalahan saat menampilkan tugas dengan error: {e}")
+        print(tabulate(table_data, headers=["ID", "Judul", "Deskripsi", "Status", "Dibuat Pada"], tablefmt="grid"))
     except Exception as e:
         # Menangkap dan mencetak kesalahan jika terjadi masalah saat menampilkan tugas
         print(f"terjadi kesalahan saat menampilkan tugas dengan error: {e}")
@@ -63,6 +80,8 @@ def delete_task(task_id):
         print(f"error penghapusan data, please check {e}")
 
 def main():
+    os.system('cls' if os.name == 'nt' else 'clear')  # Membersihkan konsol saat program dimulai
+
     while True:
         # Menampilkan menu opsi kepada pengguna
         print("1. Tambah Tugas")
@@ -76,7 +95,7 @@ def main():
             title = input("Masukkan Judul Tugas: ")
             description = input("Masukkan Deskripsi Tugas: ")
             status = input("Masukkan Status Tugas: ")  # Status diminta tetapi tidak digunakan dalam fungsi
-            add_task(title, description)  # Menambahkan tugas baru
+            add_task(title, description, status)  # Menambahkan tugas baru
         elif pilihan == "2":
             view_all_tasks()  # Menampilkan semua tugas
         elif pilihan == "3":
