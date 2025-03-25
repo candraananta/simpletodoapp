@@ -1,7 +1,7 @@
 from pymongo import MongoClient  # Mengimpor MongoClient dari pustaka pymongo untuk menghubungkan aplikasi ke MongoDB
 from datetime import datetime  # Mengimpor datetime untuk menambahkan timestamp
 from tabulate import tabulate  # Mengimpor tabulate untuk menampilkan data dalam bentuk tabel
-import os  # Mengimpor os untuk membersihkan konsol
+import os  # Mengimpor os untuk membersihkan konsoll
 
 # Membuat koneksi ke MongoDB menggunakan URI koneksi
 client = MongoClient("mongodb+srv://androidone252:p7wRtscSkaOTPJPu@cluster0.am62x.mongodb.net/?retryWrites=true&w=majority&appName=Cluster0")
